@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ filename }}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scroll-restoration.js') }}"
+            defer></script>
+</head>
+<body>
+    <main class="page-shell">
+        <nav class="page-navigation">
+            <a class="button{% if request.endpoint == 'home' %} active{% endif %}"
+               href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a class="button{% if request.endpoint in ['placements', 'placement_detail'] %} active{% endif %}"
+               href="{{ url_for('placements') }}">
+                Placements
+            </a>
+
+            <a class="button{% if request.endpoint in ['apps_page', 'app_detail'] %} active{% endif %}"
+               href="{{ url_for('apps_page') }}">
+                Apps
+            </a>
+        </nav>
+
+        <a class="back-link" href="{{ url_for('placements') }}">
+            &larr; Back to all placements
+        </a>
+
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">Placement details</p>
+                <h1>{{ filename }}</h1>
+                <p class="page-description">
+                    {{ placement["ads"] | length }} advertisement(s)
+                    |
+                    {{ placement_summary["impression"] }} impressions
+                    |
+                    {{ placement_summary["click"] }} clicks
+                </p>
+            </div>
+        </header>
+        {% if detail_error %}
+            <p class="error">{{ detail_error }}</p>
+        {% endif %}
+
+        <form class="report-filter"
+              method="get"
+              action="{{ url_for(
+                  'placement_detail',
+                  filename=filename
+              ) }}">
+            <div class="filter-field">
+                <label for="from_day">From date</label>
+                <input type="date"
+                       id="from_day"
+                       name="from_day"
+                       value="{{ from_day }}">
+            </div>
+
+            <div class="filter-field">
+                <label for="to_day">To date</label>
+                <input type="date"
+                       id="to_day"
+                       name="to_day"
+                       value="{{ to_day }}">
+            </div>
+
+            <button class="button" type="submit">
+                Apply filter
+            </button>
+
+            {% if from_day or to_day %}
+                <a class="back-link"
+                   href="{{ url_for(
+                       'placement_detail',
+                       filename=filename
+                   ) }}">
+                    Clear filter
+                </a>
+            {% endif %}
+        </form>
+
+        <section class="detail-panel add-ad-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Placement controls</p>
+                    <h2>Add an advertisement</h2>
+                </div>
+            </div>
+            {% if available_advertisements %}
+                <form class="add-ad-form"
+                      method="post"
+                      action="{{ url_for(
+                          'add_advertisement',
+                          placement_name=filename[:-5]
+                      ) }}">
+                    <input type="hidden"
+                           name="performance_view"
+                           value="{{ performance_view }}">
+                    <div class="filter-field">
+                        <label for="advertisement">Available app and creative</label>
+                        <select id="advertisement" name="advertisement" required>
+                            <option value="">Select an advertisement</option>
+                            {% for advertisement in available_advertisements %}
+                                <option value="{{ advertisement['value'] }}">
+                                    {{ advertisement["app"] }} /
+                                    {{ advertisement["creative"] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="button" type="submit">Add to placement</button>
+                </form>
+            {% else %}
+                <p class="empty-state">
+                    All advertised apps and creatives are already appearing.
+                </p>
+            {% endif %}
+        </section>
+
+        <!-- <section class="metric-grid">
+            <article class="metric-card">
+                <span>Daily users</span>
+                <strong>{{ placement_summary["placement_daily_users"] }}</strong>
+            </article>
+
+            <article class="metric-card">
+                <span>Impressions</span>
+                <strong>{{ placement_summary["impression"] }}</strong>
+            </article>
+
+            <article class="metric-card">
+                <span>Clicks</span>
+                <strong>{{ placement_summary["click"] }}</strong>
+            </article>
+
+            <article class="metric-card">
+                <span>Installs</span>
+                <strong>{{ placement_summary["install"] }}</strong>
+            </article>
+
+            <article class="metric-card">
+                <span>CTR</span>
+                <strong>{{ placement_summary["ctr"] }}%</strong>
+            </article>
+
+            <article class="metric-card">
+                <span>Install rate</span>
+                <strong>{{ placement_summary["install_rate"] }}%</strong>
+            </article>
+        </section> -->
+
+        <section class="detail-panel report-section">
+            <h2>Performance summary</h2>
+
+            {% if placement_metrics %}
+                <div class="table-wrapper">
+                    <table class="ads-table">
+                        <thead>
+                            <tr>
+                                <th>Placement</th>
+                                <th>Orientation</th>
+                                <th>Daily users</th>
+                                <th>Impressions</th>
+                                <th>Clicks</th>
+                                <th>Installs</th>
+                                <th>CTR</th>
+                                <th>Install rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for metrics in placement_metrics %}
+                                <tr>
+                                    <td>{{ metrics["placement"] }}</td>
+                                    <td>{{ metrics["orientation"] }}</td>
+                                    <td>{{ metrics["placement_daily_users"] }}</td>
+                                    <td>{{ metrics["impression"] }}</td>
+                                    <td>{{ metrics["click"] }}</td>
+                                    <td>{{ metrics["install"] }}</td>
+                                    <td>{{ metrics["ctr"] }}%</td>
+                                    <td>{{ metrics["install_rate"] }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-state">
+                    No performance data is available for this placement.
+                </p>
+            {% endif %}
+        </section>
+        <section class="detail-panel report-section">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Placement inventory</p>
+                    <h2>Currently appearing advertisements</h2>
+                </div>
+                <div class="view-switch" aria-label="Performance view">
+                    <a class="view-switch-link{% if performance_view == 'with_performance' %} active{% endif %}"
+                       href="{{ url_for(
+                           'placement_detail',
+                           filename=filename,
+                           from_day=from_day,
+                           to_day=to_day,
+                           performance_view='with_performance'
+                       ) }}">
+                        With performance ({{ with_performance_count }})
+                    </a>
+                    <a class="view-switch-link{% if performance_view == 'all' %} active{% endif %}"
+                       href="{{ url_for(
+                           'placement_detail',
+                           filename=filename,
+                           from_day=from_day,
+                           to_day=to_day,
+                           performance_view='all'
+                       ) }}">
+                        All appearing ({{ all_appearing_count }})
+                    </a>
+                </div>
+            </div>
+
+            {% if app_creative_breakdown %}
+                <div class="table-wrapper">
+                    <table class="ads-table">
+                        <thead>
+                            <tr>
+                                <th>App</th>
+                                <th>Creative</th>
+                                <th>Orientation</th>
+                                <th>Impressions</th>
+                                <th>Unique impressions</th>
+                                <th>Clicks</th>
+                                <th>Unique clicks</th>
+                                <th>Installs</th>
+                                <th>Action</th>
+                                <th>Testing</th>
+                                <th>CTR</th>
+                                <th>Install rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for metrics in app_creative_breakdown %}
+                                <tr>
+                                    <td>
+                                        <a class="data-link"
+                                           href="{{ url_for(
+                                               'app_detail',
+                                               app_name=metrics['app'],
+                                               from_day=from_day,
+                                               to_day=to_day
+                                           ) }}">
+                                            {{ metrics["app"] }}
+                                        </a>
+                                    </td>
+                                    <td>{{ metrics["creative"] }}</td>
+                                    <td>
+                                        {% if metrics["has_performance"] %}
+                                            {{ metrics["orientation"] }}
+                                        {% else %}
+                                            Not available
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ metrics["impression"] if metrics["has_performance"] else "—" }}</td>
+                                    <td>{{ metrics["unique_impression"] if metrics["has_performance"] else "—" }}</td>
+                                    <td>{{ metrics["click"] if metrics["has_performance"] else "—" }}</td>
+                                    <td>{{ metrics["unique_click"] if metrics["has_performance"] else "—" }}</td>
+                                    <td>{{ metrics["install"] if metrics["has_performance"] else "—" }}</td>
+                                    {% set ad_key = metrics["app"] ~ "|" ~ metrics["creative"] %}
+                                    <td>
+                                        <form method="post"
+                                              onsubmit="return confirm(
+                                                  'Remove this advertisement from the placement?'
+                                              );"
+                                              action="{{ url_for(
+                                                  'update_ad_enabled',
+                                                  placement_name=filename[:-5],
+                                                  app_name=metrics['app'],
+                                                  creative=metrics['creative']
+                                              ) }}">
+                                            <input type="hidden" name="enabled" value="false">
+                                            <input type="hidden" name="from_day" value="{{ from_day }}">
+                                            <input type="hidden" name="to_day" value="{{ to_day }}">
+                                            <input type="hidden" name="performance_view" value="{{ performance_view }}">
+                                            <button class="button danger-button"
+                                                    type="submit">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        {% if ad_key in ad_index_by_app_creative %}
+                                            <form method="post"
+                                                  action="{{ url_for(
+                                                      'update_ad_testing',
+                                                      placement_name=filename[:-5],
+                                                      ad_index=ad_index_by_app_creative[ad_key]
+                                                  ) }}">
+                                                <input type="hidden" name="isTested" value="false">
+                                                <input type="hidden" name="page" value="{{ page }}">
+                                                <input type="hidden" name="from_day" value="{{ from_day }}">
+                                                <input type="hidden" name="to_day" value="{{ to_day }}">
+                                                <input type="hidden" name="performance_view" value="{{ performance_view }}">
+                                                <label class="testing-switch">
+                                                    <input type="checkbox"
+                                                           name="isTested"
+                                                           value="true"
+                                                           onchange="this.form.submit()"
+                                                           {% if ad_testing_by_app_creative.get(ad_key, false) %}
+                                                               checked
+                                                           {% endif %}>
+                                                    <span class="switch-track">
+                                                        <span class="switch-thumb"></span>
+                                                    </span>
+                                                    <span class="switch-label">
+                                                        {% if ad_testing_by_app_creative.get(ad_key, false) %}
+                                                            ON
+                                                        {% else %}
+                                                            OFF
+                                                        {% endif %}
+                                                    </span>
+                                                </label>
+                                            </form>
+                                        {% else %}
+                                            <span class="switch-unavailable">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ metrics["ctr"] ~ "%" if metrics["has_performance"] else "—" }}</td>
+                                    <td>{{ metrics["install_rate"] ~ "%" if metrics["has_performance"] else "—" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_pages > 1 %}
+                    <nav class="pagination" aria-label="App and creative pages">
+                        {% if page > 1 %}
+                            <a class="pagination-link"
+                               href="{{ url_for(
+                                   'placement_detail',
+                                   filename=filename,
+                                   page=page - 1,
+                                   from_day=from_day,
+                                   to_day=to_day,
+                                   performance_view=performance_view
+                               ) }}">
+                                &larr; Previous
+                            </a>
+                        {% else %}
+                            <span class="pagination-link disabled">
+                                &larr; Previous
+                            </span>
+                        {% endif %}
+
+                        <span class="pagination-status">
+                            Page {{ page }} / {{ total_pages }}
+                        </span>
+
+                        {% if page < total_pages %}
+                            <a class="pagination-link"
+                               href="{{ url_for(
+                                   'placement_detail',
+                                   filename=filename,
+                                   page=page + 1,
+                                   from_day=from_day,
+                                   to_day=to_day,
+                                   performance_view=performance_view
+                               ) }}">
+                                Next &rarr;
+                            </a>
+                        {% else %}
+                            <span class="pagination-link disabled">
+                                Next &rarr;
+                            </span>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            {% else %}
+                <p class="empty-state">
+                    No app or creative performance data is available.
+                </p>
+            {% endif %}
+        </section>
+        <footer class="dashboard-footer">
+            <span class="footer-mark"></span>
+            <span>Reboundize &middot; Placement analytics dashboard</span>
+        </footer>
+    </main>
+</body>
+</html>

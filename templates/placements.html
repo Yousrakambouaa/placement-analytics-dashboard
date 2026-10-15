@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placements</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scroll-restoration.js') }}"
+            defer></script>
+</head>
+<body>
+    <main class="page-shell">
+        <nav class="page-navigation">
+            <a class="button{% if request.endpoint == 'home' %} active{% endif %}"
+               href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a class="button{% if request.endpoint in ['placements', 'placement_detail'] %} active{% endif %}"
+               href="{{ url_for('placements') }}">
+                Placements
+            </a>
+
+            <a class="button{% if request.endpoint in ['apps_page', 'app_detail'] %} active{% endif %}"
+               href="{{ url_for('apps_page') }}">
+                Apps
+            </a>
+        </nav>
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">Performance report</p>
+                <h1>Placements</h1>
+                <p class="page-description">
+                    Performance totals for all placements in the daily report.
+                </p>
+            </div>
+        </header>
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+
+        
+            <form class="report-filter"
+                method="get"
+                action="{{ url_for('placements') }}">
+
+                <div class="filter-field">
+                    <label for="from_day">From date</label>
+                    <input type="date"
+                        id="from_day"
+                        name="from_day"
+                        value="{{ from_day }}">
+                </div>
+
+                <div class="filter-field">
+                    <label for="to_day">To date</label>
+                    <input type="date"
+                        id="to_day"
+                        name="to_day"
+                        value="{{ to_day }}">
+                </div>
+
+                <div class="filter-field">
+                    <label for="app">Filter by app</label>
+
+                    <select id="app" name="app">
+                        <option value=""
+                            {% if not selected_app %}selected{% endif %}>
+                            All apps
+                        </option>
+
+                        {% for app in available_apps %}
+                            <option value="{{ app }}"
+                                {% if selected_app == app %}selected{% endif %}>
+                                {{ app }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="creative">Filter by creative</label>
+
+                    <select id="creative" name="creative">
+                        <option value=""
+                            {% if not selected_creative %}selected{% endif %}>
+                            All creatives
+                        </option>
+
+                        {% for creative in available_creatives %}
+                            <option value="{{ creative }}"
+                                {% if selected_creative == creative %}selected{% endif %}>
+                                {{ creative }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button class="button" type="submit">
+                    Apply filters
+                </button>
+
+                {% if from_day or to_day or selected_app or selected_creative %}
+                    <a class="back-link" href="{{ url_for('placements') }}">
+                        Clear filters
+                    </a>
+                {% endif %}
+            </form>
+
+            <section class="metric-grid">
+                <article class="metric-card">
+                    <span>Placements</span>
+                    <strong>{{ summary["placement_count"] }}</strong>
+                </article>
+
+                <article class="metric-card">
+                    <span>Daily users</span>
+                    <strong>{{ summary["placement_daily_users"] }}</strong>
+                </article>
+
+                <article class="metric-card">
+                    <span>Impressions</span>
+                    <strong>{{ summary["impression"] }}</strong>
+                </article>
+
+                <article class="metric-card">
+                    <span>Clicks</span>
+                    <strong>{{ summary["click"] }}</strong>
+                </article>
+
+                <article class="metric-card">
+                    <span>Installs</span>
+                    <strong>{{ summary["install"] }}</strong>
+                </article>
+
+                <article class="metric-card">
+                    <span>CTR</span>
+                    <strong>{{ summary["ctr"] }}%</strong>
+                </article>
+
+                <article class="metric-card">
+                    <span>Install rate</span>
+                    <strong>{{ summary["install_rate"] }}%</strong>
+                </article>
+            </section>
+
+            {% if placements %}
+                <section class="detail-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Placement directory</p>
+                        <h2>Performance by placement</h2>
+                    </div>
+                    <span class="result-count">
+                        Showing page {{ page }} of {{ total_pages }}
+                    </span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="ads-table">
+                        <thead>
+                            <tr>
+                                <th>Placement</th>
+                                <th>Orientation</th>
+                                <th>Daily users</th>
+                                <th>Impressions</th>
+                                <th>Unique impressions</th>
+                                <th>Clicks</th>
+                                <th>Unique clicks</th>
+                                <th>Installs</th>
+                                <th>CTR</th>
+                                <th>Install rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for placement in placements %}
+                                <tr>
+                                    <td>
+                                        {% if placement["placement"] in placement_json_names %}
+                                            <a class="data-link"
+                                            href="{{ url_for(
+                                                'placement_detail',
+                                                filename=placement['placement'] + '.json'
+                                            ) }}">
+                                                {{ placement["placement"] }}
+                                            </a>
+                                        {% else %}
+                                            {{ placement["placement"] }}
+                                            <small class="muted-note">
+                                                No JSON file yet
+                                            </small>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ placement["orientation"] }}
+                                    </td>
+
+                                    <td>{{ placement["placement_daily_users"] }}</td>
+                                    <td>{{ placement["impression"] }}</td>
+                                    <td>{{ placement["unique_impression"] }}</td>
+                                    <td>{{ placement["click"] }}</td>
+                                    <td>{{ placement["unique_click"] }}</td>
+                                    <td>{{ placement["install"] }}</td>
+                                    <td>{{ placement["ctr"] }}%</td>
+                                    <td>{{ placement["install_rate"] }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_pages > 1 %}
+                    <nav class="pagination" aria-label="Placement pages">
+                        {% if page > 1 %}
+                            <a class="pagination-link"
+                               href="{{ url_for(
+                                   'placements',
+                                   page=page - 1,
+                                   from_day=from_day,
+                                   to_day=to_day,
+                                   app=selected_app,
+                                   creative=selected_creative
+                               ) }}">
+                                &larr; Previous
+                            </a>
+                        {% else %}
+                            <span class="pagination-link disabled">
+                                &larr; Previous
+                            </span>
+                        {% endif %}
+
+                        <span class="pagination-status">
+                            Page {{ page }} / {{ total_pages }}
+                        </span>
+
+                        {% if page < total_pages %}
+                            <a class="pagination-link"
+                               href="{{ url_for(
+                                   'placements',
+                                   page=page + 1,
+                                   from_day=from_day,
+                                   to_day=to_day,
+                                   app=selected_app,
+                                   creative=selected_creative
+                               ) }}">
+                                Next &rarr;
+                            </a>
+                        {% else %}
+                            <span class="pagination-link disabled">
+                                Next &rarr;
+                            </span>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            </section>
+        {% else %}
+            <p class="empty-state">
+                No placement performance data was found.
+            </p>
+        {% endif %}
+        <footer class="dashboard-footer">
+            <span class="footer-mark"></span>
+            <span>Reboundize &middot; Placement analytics dashboard</span>
+        </footer>
+    </main>
+</body>
+</html>

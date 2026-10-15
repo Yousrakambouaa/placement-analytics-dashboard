@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad reporting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scroll-restoration.js') }}"
+            defer></script>
+</head>
+<body class="home-page">
+    <main class="home-shell">
+        <section class="welcome-board">
+            <div class="welcome-copy">
+                <p class="eyebrow">Welcome to your ad performance workspace</p>
+                <h1>See what makes every placement count.</h1>
+                <p class="welcome-description">
+                    Explore your advertising data in one clear place. Understand
+                    where your ads appear, which apps and creatives perform best,
+                    and how clicks and installs grow over time.
+                </p>
+
+                <div class="welcome-actions">
+                    <a class="welcome-action primary-action"
+                       href="{{ url_for('placements') }}">
+                        <span class="action-icon">↗</span>
+                        <span>
+                            <strong>Explore placements</strong>
+                            <small>Review delivery, clicks, installs, and testing status.</small>
+                        </span>
+                    </a>
+
+                    <a class="welcome-action secondary-action"
+                       href="{{ url_for('apps_page') }}">
+                        <span class="action-icon">◈</span>
+                        <span>
+                            <strong>Explore apps</strong>
+                            <small>Compare advertised apps and creative performance.</small>
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="welcome-art" aria-hidden="true">
+                <div class="art-orbit orbit-one"></div>
+                <div class="art-orbit orbit-two"></div>
+                <div class="art-card art-card-main">
+                    <span class="art-label">LIVE OVERVIEW</span>
+                    <strong>Performance</strong>
+                    <div class="art-bars">
+                        <i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                </div>
+                <div class="art-card art-card-small">
+                    <span class="art-dot"></span>
+                    <span>Your data, made clear</span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="home-footer">
+            <span class="footer-mark"></span>
+            <span>Reboundize &middot; Placement analytics dashboard</span>
+        </footer>
+    </main>
+</body>
+</html>

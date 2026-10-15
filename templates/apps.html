@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/scroll-restoration.js') }}"
+            defer></script>
+</head>
+<body>
+    <main class="page-shell">
+        <nav class="page-navigation">
+            <a class="button{% if request.endpoint == 'home' %} active{% endif %}"
+               href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a class="button{% if request.endpoint in ['placements', 'placement_detail'] %} active{% endif %}"
+               href="{{ url_for('placements') }}">
+                Placements
+            </a>
+
+            <a class="button{% if request.endpoint in ['apps_page', 'app_detail'] %} active{% endif %}"
+               href="{{ url_for('apps_page') }}">
+                Apps
+            </a>
+        </nav>
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">App performance</p>
+                <h1>Apps</h1>
+                <p class="page-description">
+                    Performance totals for each advertised app.
+                </p>
+            </div>
+        </header>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form class="report-filter"
+              method="get"
+              action="{{ url_for('apps_page') }}">
+            <div class="filter-field">
+                <label for="from_day">From date</label>
+                <input type="date"
+                       id="from_day"
+                       name="from_day"
+                       value="{{ from_day }}">
+            </div>
+
+            <div class="filter-field">
+                <label for="to_day">To date</label>
+                <input type="date"
+                       id="to_day"
+                       name="to_day"
+                       value="{{ to_day }}">
+            </div>
+
+            <button class="button" type="submit">
+                Apply filter
+            </button>
+
+            {% if from_day or to_day %}
+                <a class="back-link" href="{{ url_for('apps_page') }}">
+                    Clear filter
+                </a>
+            {% endif %}
+        </form>
+
+        {% if apps %}
+            <section class="detail-panel report-section app-directory-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Advertised app directory</p>
+                        <h2>Performance by app</h2>
+                    </div>
+                    <span class="result-count">{{ apps|length }} apps</span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="ads-table">
+                        <thead>
+                            <tr>
+                                <th>App</th>
+                                <th>ASIN</th>
+                                <th>Game link</th>
+                                <th>Creatives</th>
+                                <th>Impressions</th>
+                                <th>Unique impressions</th>
+                                <th>Clicks</th>
+                                <th>Unique clicks</th>
+                                <th>Installs</th>
+                                <th>CTR</th>
+                                <th>Install rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in apps %}
+                                <tr>
+                                    <td>
+                                        <a class="data-link"
+                                           href="{{ url_for(
+                                               'app_detail',
+                                               app_name=app['app'],
+                                               from_day=from_day,
+                                               to_day=to_day
+                                           ) }}">
+                                            {{ app["app"] }}
+                                        </a>
+                                    </td>
+                                    <td>{{ app["asin"] }}</td>
+                                    <td>
+                                        {% if app["gameLink"] %}
+                                            <a class="data-link"
+                                               href="{{ app['gameLink'] }}"
+                                               target="_blank"
+                                               rel="noopener">
+                                                Open game
+                                            </a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ app["creative_count"] }}</td>
+                                    <td>{{ app["impression"] }}</td>
+                                    <td>{{ app["unique_impression"] }}</td>
+                                    <td>{{ app["click"] }}</td>
+                                    <td>{{ app["unique_click"] }}</td>
+                                    <td>{{ app["install"] }}</td>
+                                    <td>{{ app["ctr"] }}%</td>
+                                    <td>{{ app["install_rate"] }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        {% else %}
+            <p class="empty-state">
+                No app performance data was found.
+            </p>
+        {% endif %}
+        <footer class="dashboard-footer">
+            <span class="footer-mark"></span>
+            <span>Reboundize &middot; Placement analytics dashboard</span>
+        </footer>
+    </main>
+</body>
+</html>
