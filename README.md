@@ -79,9 +79,3 @@ The expected files are:
 - One or more placement JSON files
 
 The CSV and JSON structures are validated in `report_data.py`.
-
-## GitHub
-
-This project is already connected to its GitHub repository. Keep company data
-out of Git: files in `data/` are intentionally ignored, while the application
-code and templates are tracked.
