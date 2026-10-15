@@ -82,23 +82,6 @@ The CSV and JSON structures are validated in `report_data.py`.
 
 ## GitHub
 
-From the project directory, initialize Git and create the first commit:
-
-```powershell
-git init
-git add .
-git commit -m "Initial commit"
-```
-
-Create an empty repository on GitHub, then connect and push it:
-
-```powershell
-git branch -M main
-git remote add origin https://github.com/<your-username>/<your-repository>.git
-git push -u origin main
-```
-
-Git for Windows includes Git Credential Manager, so the first HTTPS push should
-open GitHub sign-in in your browser. Use a personal access token if GitHub asks
-for a password; never put a token directly in a remote URL or commit it to the
-repository.
+This project is already connected to its GitHub repository. Keep company data
+out of Git: files in `data/` are intentionally ignored, while the application
+code and templates are tracked.
