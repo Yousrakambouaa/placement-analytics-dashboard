@@ -1,4 +1,4 @@
-# Reboundize Placement Analytics Dashboard
+# Placement Analytics Dashboard
 
 A Flask web dashboard for exploring advertising placement performance. The app
 loads the included CSV and JSON data files, then presents performance metrics
